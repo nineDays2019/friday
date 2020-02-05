@@ -3,7 +3,7 @@ import os
 from django.shortcuts import render
 from django.http import HttpResponse
 import time
-from .config import CLOUD_DIR
+from .config import cloud_dir
 from . import models
 
 
@@ -15,7 +15,7 @@ def index(request):
 
 def upload(request):
     if request.method == "POST":
-        path = CLOUD_DIR  # 保存路径
+        path = cloud_dir() + request.POST['category'] + "/"  # 保存路径
         if not os.path.exists(path):
             os.makedirs(path)
         files = request.FILES.getlist('file')
@@ -26,7 +26,8 @@ def upload(request):
                     destination.write(chunk)
                 destination.close()
 
-            file_model = models.FileModel.objects.create(path=os.path.abspath(path + name))
+            file_model = models.FileModel.objects.create(path=os.path.abspath(path + name),
+                                                         category=request.POST['category'], )
             file_model.save()
         return HttpResponse('Successful')  # 此处简单返回一个成功的消息，在实际应用中可以返回到指定的页面中
 
